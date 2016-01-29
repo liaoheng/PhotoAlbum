@@ -1,0 +1,23 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+    compile deps.supportv4
+    compile deps.appcompatv7
+    compile deps.design
+    //相册控件:https://github.com/chrisbanes/PhotoView
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
+    //图片加载:https://github.com/square/picasso
+    provided 'com.squareup.picasso:picasso:2.5.2'
+}
