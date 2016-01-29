@@ -27,14 +27,14 @@ dependencies {
     compile deps.appcompatv7
 
 
-    //函数响应式编程:https://github.com/ReactiveX/RxAndroid
+    //https://github.com/ReactiveX/RxAndroid
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
-    //HTTP+SPDY 客户端//https://github.com/square/okhttp
+    //https://github.com/square/okhttp
     compile 'com.squareup.okhttp:okhttp:2.4.0'
-    //图片加载:https://github.com/square/picasso
+    //https://github.com/square/picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
-    //SystemUiHelper:https://github.com/DreaminginCodeZH/SystemUiHelper
+    //https://github.com/DreaminginCodeZH/SystemUiHelper
     compile 'me.zhanghai.android.systemuihelper:library:1.0.0'
-    compile project(':album')
+    compile project(':library')
 }
