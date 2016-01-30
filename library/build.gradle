@@ -10,6 +10,9 @@ android {
         versionCode Integer.parseInt(VERSION_CODE)
         versionName VERSION_NAME
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -22,4 +25,4 @@ dependencies {
     provided 'com.squareup.picasso:picasso:2.5.2'
 }
 
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

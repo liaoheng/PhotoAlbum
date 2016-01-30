@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.leng.album.view.HackyViewPager
+    <com.github.liaoheng.album.view.HackyViewPager
         android:id="@id/photo_album_pager_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

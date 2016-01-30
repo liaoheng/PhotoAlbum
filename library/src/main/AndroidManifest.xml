@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.leng.album">
+    package="com.github.liaoheng.album">
 
     <application
         android:allowBackup="true">
