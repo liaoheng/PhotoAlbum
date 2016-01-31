@@ -78,8 +78,8 @@ afterEvaluate { project ->
 
                     developers {
                         developer {
-                            id POM_DEVELOPER_ID
                             name POM_DEVELOPER_NAME
+                            email POM_DEVELOPER_EMAIL
                         }
                     }
                 }
@@ -93,14 +93,15 @@ afterEvaluate { project ->
     }
 
     task androidJavadocs(type: Javadoc) {
+        options.encoding = "utf-8"//中文支持
         source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
 
-//    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-//        classifier = 'javadoc'
-//        from androidJavadocs.destinationDir
-//    }
+    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+        classifier = 'javadoc'
+        from androidJavadocs.destinationDir
+    }
 
     task androidSourcesJar(type: Jar) {
         classifier = 'sources'
@@ -109,6 +110,6 @@ afterEvaluate { project ->
 
     artifacts {
         archives androidSourcesJar
-//        archives androidJavadocsJar
+        archives androidJavadocsJar
     }
 }
