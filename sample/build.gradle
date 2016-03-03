@@ -38,5 +38,7 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     //https://github.com/DreaminginCodeZH/SystemUiHelper
     compile 'me.zhanghai.android.systemuihelper:library:1.0.0'
+
+//    compile 'com.github.liaoheng:album:1.0.0'
     compile project(':library')
 }

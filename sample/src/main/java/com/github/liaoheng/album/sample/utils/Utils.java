@@ -30,6 +30,31 @@ public class Utils {
         return ANDROID_RESOURCE + context.getPackageName() + File.separator + resourceId;
     }
 
+    public static String getName(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        int index = indexOfLastSeparator(filename);
+        return filename.substring(index + 1);
+    }
+    /**
+     * The Unix separator character.
+     */
+    private static final char UNIX_SEPARATOR = '/';
+
+    /**
+     * The Windows separator character.
+     */
+    private static final char WINDOWS_SEPARATOR = '\\';
+    public static   int indexOfLastSeparator(String filename) {
+        if (filename == null) {
+            return -1;
+        }
+        int lastUnixPos = filename.lastIndexOf(UNIX_SEPARATOR);
+        int lastWindowsPos = filename.lastIndexOf(WINDOWS_SEPARATOR);
+        return Math.max(lastUnixPos, lastWindowsPos);
+    }
+
     /**
      * 是否为网络地址
      * @param url

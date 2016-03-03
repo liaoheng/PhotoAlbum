@@ -15,7 +15,6 @@ import com.github.liaoheng.album.model.Album;
 import com.github.liaoheng.album.ui.ImagePagerDelegate;
 
 /**
- * 图片翻页显示，可滑动关闭
  * @author liaoheng
  * @version 2015-06-16 16:11
  */
