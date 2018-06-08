@@ -1,18 +1,17 @@
 package com.github.liaoheng.album.sample;
 
-import java.io.File;
-
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,17 +21,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.ImageViewTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.github.liaoheng.album.model.Album;
+import com.github.liaoheng.album.sample.utils.GlideApp;
 import com.github.liaoheng.album.sample.utils.Utils;
 import com.github.liaoheng.album.ui.ImageDetailDelegate;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 /**
  * @author liaoheng
  * @version 2015-12-24 09:37
  */
 public class ImageViewFragment extends Fragment {
+
+    private final String TAG = ImageViewFragment.class.getSimpleName();
 
     public static ImageViewFragment newInstance(Album album) {
         final ImageViewFragment f = new ImageViewFragment();
@@ -41,120 +47,124 @@ public class ImageViewFragment extends Fragment {
     }
 
     private ImageDetailDelegate detailDelegate;
-    private CompleteReceiver       completeReceiver;
+    private CompleteReceiver completeReceiver;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         completeReceiver = new CompleteReceiver();
-        /** register download success broadcast **/
         getContext().registerReceiver(completeReceiver,
                 new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
-        getDetailDelegate().onCreate(savedInstanceState, this);
+        setHasOptionsMenu(true);
         getDetailDelegate().setImageListener(new ImageDetailDelegate.ImageListener() {
             @Override
-            public void load(String url, final ImageView imageView) {
-                Uri path;
-                if (Utils.isHtmlUrl(url)) {
-                    path = Uri.parse(url);
-                } else {
-                    path = Uri.fromFile(new File(url));
-                }
-
-                Target target = new Target() {
+            public void load(Album album, final ImageView imageView) {
+                mRetry.setVisibility(View.GONE);
+                GlideApp.with(ImageViewFragment.this).load(album.getUrl()).listener(new RequestListener<Drawable>() {
 
                     @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                        imageView.setImageBitmap(bitmap);
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target,
+                            boolean isFirstResource) {
+                        getDetailDelegate().finished();
+                        getDetailDelegate().error(e);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
+                            DataSource dataSource,
+                            boolean isFirstResource) {
+                        return false;
+                    }
+                }).into(new ImageViewTarget<Drawable>(imageView) {
+
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource,
+                            @Nullable Transition<? super Drawable> transition) {
+                        super.onResourceReady(resource, transition);
+                        imageView.setImageDrawable(resource);
                         getDetailDelegate().finished();
                         getDetailDelegate().complete();
                     }
 
                     @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        getDetailDelegate().finished();
-                        getDetailDelegate().error();
+                    protected void setResource(@Nullable Drawable resource) {
+
                     }
 
                     @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        getDetailDelegate().started();
+                    public void onLoadStarted(@Nullable Drawable placeholder) {
+                        super.onLoadStarted(placeholder);
+                        getDetailDelegate().start();
                     }
-                };
-                imageView.setTag(target);
-                Picasso.with(getContext()).load(path).into(target);
+                });
             }
 
             @Override
-            public void destroy(String imageUrl, ImageView imageView) {
-                Picasso.with(getContext()).cancelRequest((Target) imageView.getTag());
+            public void error(Album album, ImageView imageView, Throwable e) {
+                mRetry.setVisibility(View.VISIBLE);
+                Log.e(TAG, e.getMessage(), e);
             }
 
             @Override
-            public void downloadStart(String imageUrl) {
-                Toast.makeText(getContext(),"start download",Toast.LENGTH_SHORT).show();
-                DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                Uri uri = Uri.parse(imageUrl);
-                DownloadManager.Request request = new DownloadManager.Request(uri);
-                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE
-                        | DownloadManager.Request.NETWORK_WIFI);
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setVisibleInDownloadsUi(true);
-                request.setDestinationInExternalFilesDir(getContext(), null, getName(imageUrl));
-                downloadManager.enqueue(request);
+            public void destroy(Album album, ImageView imageView) {
+                //https://github.com/bumptech/glide/issues/803#issuecomment-163528497
+                GlideApp.with(ImageViewFragment.this).clear(imageView);
             }
         });
+
     }
 
     class CompleteReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Toast.makeText(context,"download ok",Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "download ok", Toast.LENGTH_SHORT).show();
         }
-    };
-
-    public  String getName(String filename) {
-        if (filename == null) {
-            return null;
-        }
-        int index = indexOfLastSeparator(filename);
-        return filename.substring(index + 1);
     }
-    /**
-     * The Unix separator character.
-     */
-    private static final char UNIX_SEPARATOR = '/';
 
-    /**
-     * The Windows separator character.
-     */
-    private static final char WINDOWS_SEPARATOR = '\\';
-    public  int indexOfLastSeparator(String filename) {
-        if (filename == null) {
-            return -1;
-        }
-        int lastUnixPos = filename.lastIndexOf(UNIX_SEPARATOR);
-        int lastWindowsPos = filename.lastIndexOf(WINDOWS_SEPARATOR);
-        return Math.max(lastUnixPos, lastWindowsPos);
-    }
+    private View mRetry;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return getDetailDelegate().onCreateView(inflater,container,savedInstanceState,this,null);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.photo_album_detail, container, false);
+        mRetry = view.findViewById(R.id.photo_album_detail_retry);
+
+        if (mRetry != null) {
+            mRetry.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getDetailDelegate().loadImage();
+                }
+            });
+        }
+        getDetailDelegate().onCreate(view, getArguments());
+        getDetailDelegate().loadImage();
+
+        return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        getDetailDelegate().onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.photo_album_menu, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (getDetailDelegate().onOptionsItemSelected(item, getActivity())) {
+        if (item.getItemId() == R.id.photo_album_download_image) {
+            Uri url = getDetailDelegate().getAlbum().getUrl();
+            Toast.makeText(getContext(), "start download", Toast.LENGTH_SHORT).show();
+            DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            DownloadManager.Request request = new DownloadManager.Request(url);
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE
+                    | DownloadManager.Request.NETWORK_WIFI);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setVisibleInDownloadsUi(true);
+            request.setDestinationInExternalFilesDir(getContext(), null, Utils.getName(url.toString()));
+            downloadManager.enqueue(request);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -162,8 +172,8 @@ public class ImageViewFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        getDetailDelegate().destroy();
         super.onDestroyView();
-        getDetailDelegate().onDestroyView();
     }
 
     @Override

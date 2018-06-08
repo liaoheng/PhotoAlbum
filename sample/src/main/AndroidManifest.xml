@@ -15,7 +15,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ImageViewActivity"/>
-        <activity android:name="com.github.liaoheng.album.ui.ImagePagerActivity" />
+        <activity android:name=".ImageListActivity" />
     </application>
 
 </manifest>

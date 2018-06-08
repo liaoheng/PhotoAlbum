@@ -6,32 +6,34 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.github.liaoheng.album.model.Album;
 
+import java.util.List;
+
 /**
  * @author liaoheng
  * @version 2015-04-18 01:47
  */
 public class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
-    private Album              mAlbum;
-    private ImagePagerListener listener;
+    private List<Album> mAlbums;
+    private ImagePagerListener mListener;
 
     public interface ImagePagerListener {
         Fragment getFragment(int position, Album album);
     }
 
-    public ImagePagerAdapter(FragmentManager fm, Album album, ImagePagerListener listener) {
+    public ImagePagerAdapter(FragmentManager fm, List<Album> albums, ImagePagerListener listener) {
         super(fm);
-        this.mAlbum = album;
-        this.listener = listener;
+        mAlbums = albums;
+        mListener = listener;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return listener.getFragment(position, mAlbum.getItems().get(position));
+        return mListener.getFragment(position, mAlbums.get(position));
     }
 
     @Override
     public int getCount() {
-        return mAlbum.getItems() == null ? 0 : mAlbum.getItems().size();
+        return mAlbums == null ? 0 : mAlbums.size();
     }
 }

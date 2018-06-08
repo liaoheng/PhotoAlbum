@@ -1,18 +1,21 @@
 package com.github.liaoheng.album.sample;
 
-import me.zhanghai.android.systemuihelper.SystemUiHelper;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.github.liaoheng.album.adapter.ImagePagerAdapter;
 import com.github.liaoheng.album.model.Album;
 import com.github.liaoheng.album.ui.ImagePagerDelegate;
+
+import java.util.ArrayList;
+
+import me.zhanghai.android.systemuihelper.SystemUiHelper;
 
 /**
  * @author liaoheng
@@ -20,34 +23,40 @@ import com.github.liaoheng.album.ui.ImagePagerDelegate;
  */
 public class ImageViewActivity extends AppCompatActivity {
     private ImagePagerDelegate pagerDelegate;
-    private SystemUiHelper     mSystemUiHelper;
+    private SystemUiHelper mSystemUiHelper;
 
-    public static void start(Context context, Album album) {
-        start(context, album, 0);
+    public static void start(Context context, ArrayList<Album> albums) {
+        start(context, albums, 0);
     }
 
-    public static void start(Context context, Album album, int pagerPosition) {
+    public static void start(Context context, ArrayList<Album> albums, int pagerPosition) {
         Intent intent = new Intent(context, ImageViewActivity.class);
-        intent.putExtras(ImagePagerDelegate.getBundle(album, pagerPosition));
+        intent.putExtras(ImagePagerDelegate.getBundle(albums, pagerPosition));
         context.startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.photo_album_pager);
 
         mSystemUiHelper = new SystemUiHelper(this, SystemUiHelper.LEVEL_IMMERSIVE,
-            SystemUiHelper.FLAG_IMMERSIVE_STICKY);
+                SystemUiHelper.FLAG_IMMERSIVE_STICKY);
         mSystemUiHelper.hide();
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.photo_album_pager_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         getPagerDelegate().onCreate(savedInstanceState, this);
-        getPagerDelegate().initData(getSupportFragmentManager(),
-            new ImagePagerAdapter.ImagePagerListener() {
-                @Override
-                public Fragment getFragment(int position, Album album) {
-                    return ImageViewFragment.newInstance(album);
-                }
-            });
+        getPagerDelegate().setPagerAdapter(getSupportFragmentManager(),
+                new ImagePagerAdapter.ImagePagerListener() {
+                    @Override
+                    public Fragment getFragment(int position, Album album) {
+                        return ImageViewFragment.newInstance(album);
+                    }
+                });
     }
 
     @Override

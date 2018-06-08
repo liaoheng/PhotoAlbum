@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="photo_album_download_image">保存圖片</string>
-    <string name="photo_album_not_download_image">無法保存圖片</string>
-    <string name="photo_album_detail_retry">點擊重試</string>
-</resources>

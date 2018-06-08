@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="photo_album_pager_view" type="id"/>
-    <item name="photo_album_pager_toolbar" type="id"/>
     <item name="photo_album_pager_indicator" type="id"/>
     <item name="photo_album_detail_image" type="id"/>
     <item name="photo_album_detail_loading" type="id"/>
-    <item name="photo_album_detail_retry" type="id"/>
 </resources>

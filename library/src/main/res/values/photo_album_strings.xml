@@ -1,6 +1,3 @@
 <resources>
     <string name="photo_album_viewpager_indicator">%1$d/%2$d</string>
-    <string name="photo_album_download_image">Save Image</string>
-    <string name="photo_album_not_download_image">Unable to save image</string>
-    <string name="photo_album_detail_retry">Click to retry</string>
 </resources>

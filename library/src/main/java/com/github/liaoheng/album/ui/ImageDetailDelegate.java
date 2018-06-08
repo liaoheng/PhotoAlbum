@@ -1,154 +1,121 @@
 package com.github.liaoheng.album.ui;
 
-import uk.co.senab.photoview.PhotoView;
-import uk.co.senab.photoview.PhotoViewAttacher;
-
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.github.liaoheng.album.R;
 import com.github.liaoheng.album.model.Album;
+import com.github.liaoheng.album.model.ImageStateListener;
+import com.github.liaoheng.album.view.PhotoView;
 
 /**
  * 图片查看
+ *
  * @author liaoheng
  * @version 2015-12-23 17:16
  */
-public class ImageDetailDelegate {
+public class ImageDetailDelegate implements ImageStateListener {
 
-    private Album             mAlbum;
-    private PhotoView         mPhotoView;
-    private View              mRetry;
-    private ProgressBar       mProgressBar;
-    private PhotoViewAttacher mAttacher;
-    private ImageListener     mImageListener;
+    private Album mAlbum;
+    private ImageView mPhotoView;
+    private ProgressBar mProgressBar;
+    private PhotoViewAttacher mPhotoViewAttacher;
+    private ImageListener mImageListener;
 
     public static Bundle getBundle(Album album) {
         final Bundle args = new Bundle();
-        args.putSerializable(ImagePagerDelegate.ALBUM, album);
+        args.putParcelable(ImagePagerDelegate.ALBUM, album);
         return args;
     }
 
-    public void onCreate(Bundle savedInstanceState, Fragment fragment) {
-        fragment.setHasOptionsMenu(true);
-    }
-
-    public View onCreateView(View view, Bundle savedInstanceState, Fragment fragment,
-                             PhotoViewAttacher.OnPhotoTapListener listener) {
-        mAlbum = fragment.getArguments() != null
-            ? (Album) fragment.getArguments().getSerializable(ImagePagerDelegate.ALBUM) : null;
-        mPhotoView = (PhotoView) view.findViewById(R.id.photo_album_detail_image);
-        if (mPhotoView == null) {
-            throw new IllegalArgumentException("PhotoView is null");
+    public void onCreate(View view, Bundle args) {
+        if (args == null) {
+            throw new IllegalArgumentException("args is null");
         }
-        mAttacher = new PhotoViewAttacher(mPhotoView);
-
-        mAttacher.setOnPhotoTapListener(listener);
+        mAlbum = args.getParcelable(ImagePagerDelegate.ALBUM);
+        if (mAlbum == null) {
+            throw new IllegalArgumentException("Album is null");
+        }
+        mPhotoView = view.findViewById(R.id.photo_album_detail_image);
+        if (mPhotoView == null) {
+            throw new IllegalArgumentException("ImageView is null");
+        }
+        if (isPhotoView()) {
+            mPhotoViewAttacher = ((PhotoView) mPhotoView).getAttacher();
+        } else {
+            mPhotoViewAttacher = new PhotoViewAttacher(mPhotoView);
+            mPhotoView.setScaleType(ImageView.ScaleType.MATRIX);
+        }
 
         mProgressBar = (ProgressBar) view.findViewById(R.id.photo_album_detail_loading);
-        mRetry = view.findViewById(R.id.photo_album_detail_retry);
-        if (mRetry != null) {
-            mRetry.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    loadImage();
-                }
-            });
-        }
-        loadImage();
-        return view;
     }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState, Fragment fragment,
-                             PhotoViewAttacher.OnPhotoTapListener listener) {
-        View v = inflater.inflate(R.layout.photo_album_detail, container, false);
-        return onCreateView(v, savedInstanceState, fragment, listener);
-    }
-
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.photo_album_menu, menu);
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item, Activity activity) {
-        if (item.getItemId() == R.id.photo_album_download_image) {
-            if (mImageListener != null) {
-                if (mAlbum == null || TextUtils.isEmpty(mAlbum.getUrl())) {
-                    Toast.makeText(activity,
-                        activity.getString(R.string.photo_album_not_download_image),
-                        Toast.LENGTH_LONG).show();
-                    return true;
-                }
-                mImageListener.downloadStart(mAlbum.getUrl());
-            }
-        }
-        return false;
+    private boolean isPhotoView() {
+        return mPhotoView instanceof com.github.chrisbanes.photoview.PhotoView;
     }
 
     public interface ImageListener {
-        void load(String imageUrl, ImageView imageView);
+        void load(Album album, ImageView imageView);
 
-        void destroy(String imageUrl, ImageView imageView);
+        void error(Album album, ImageView imageView,Throwable e);
 
-        void downloadStart(String imageUrl);
+        void destroy(Album album, ImageView imageView);
     }
 
     public void setImageListener(ImageListener imageListener) {
         this.mImageListener = imageListener;
     }
 
-    public void started() {
-        if (mRetry != null) {
-            mRetry.setVisibility(View.GONE);
-        }
+    @Override
+    public void start() {
         if (mProgressBar != null) {
             mProgressBar.setVisibility(View.VISIBLE);
         }
     }
 
-    public void error() {
-        if (mRetry != null) {
-            mRetry.setVisibility(View.VISIBLE);
+    @Override
+    public void error(Throwable e) {
+        if (mImageListener != null) {
+            mImageListener.error(mAlbum, mPhotoView,e);
         }
     }
 
+    @Override
     public void complete() {
-        mAttacher.update();
+        if (!isPhotoView() && mPhotoViewAttacher != null) {
+            mPhotoViewAttacher.update();
+        }
     }
 
+    @Override
     public void finished() {
         if (mProgressBar != null) {
             mProgressBar.setVisibility(View.GONE);
         }
     }
 
-    private void loadImage() {
-        if (mAlbum == null) {
-            return;
-        }
+    @Override
+    public void destroy() {
         if (mImageListener != null) {
-            mImageListener.load(mAlbum.getUrl(), mPhotoView);
+            mImageListener.destroy(mAlbum, mPhotoView);
         }
     }
 
-    public void onDestroyView() {
-        mAttacher.cleanup();
-        if (mAlbum == null) {
-            return;
-        }
+    @Override
+    public void loadImage() {
         if (mImageListener != null) {
-            mImageListener.destroy(mAlbum.getUrl(), mPhotoView);
+            mImageListener.load(mAlbum, mPhotoView);
         }
+    }
+
+    public PhotoViewAttacher getPhotoViewAttacher() {
+        return mPhotoViewAttacher;
+    }
+
+    public Album getAlbum() {
+        return mAlbum;
     }
 }
