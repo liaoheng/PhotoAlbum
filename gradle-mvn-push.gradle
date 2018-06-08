@@ -18,7 +18,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 def isReleaseBuild() {
-    return VERSION_NAME.contains("SNAPSHOT") == false
+    return !VERSION_NAME.contains("SNAPSHOT")
 }
 
 def getReleaseRepositoryUrl() {
@@ -37,6 +37,10 @@ def getRepositoryUsername() {
 
 def getRepositoryPassword() {
     return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+def getJavaDocFileEncoding() {
+    return hasProperty('JAVADOC_FILE_ENCODING') ? JAVADOC_FILE_ENCODING : "UTF-8"
 }
 
 afterEvaluate { project ->
@@ -93,9 +97,13 @@ afterEvaluate { project ->
     }
 
     task androidJavadocs(type: Javadoc) {
-        options.encoding = "utf-8"//中文支持
         source = android.sourceSets.main.java.srcDirs
+        // https://www.2cto.com/kf/201701/582969.html
+        options.encoding = getJavaDocFileEncoding()
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+        failOnError false
     }
 
     task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
