@@ -10,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.github.liaoheng.album.adapter.ImagePagerAdapter;
-import com.github.liaoheng.album.model.Album;
 import com.github.liaoheng.album.ui.ImagePagerDelegate;
 
 import java.util.ArrayList;
@@ -22,14 +21,14 @@ import me.zhanghai.android.systemuihelper.SystemUiHelper;
  * @version 2015-06-16 16:11
  */
 public class ImageViewActivity extends AppCompatActivity {
-    private ImagePagerDelegate pagerDelegate;
+    private ImagePagerDelegate<Media> pagerDelegate;
     private SystemUiHelper mSystemUiHelper;
 
-    public static void start(Context context, ArrayList<Album> albums) {
+    public static void start(Context context, ArrayList<Media> albums) {
         start(context, albums, 0);
     }
 
-    public static void start(Context context, ArrayList<Album> albums, int pagerPosition) {
+    public static void start(Context context, ArrayList<Media> albums, int pagerPosition) {
         Intent intent = new Intent(context, ImageViewActivity.class);
         intent.putExtras(ImagePagerDelegate.getBundle(albums, pagerPosition));
         context.startActivity(intent);
@@ -51,10 +50,10 @@ public class ImageViewActivity extends AppCompatActivity {
 
         getPagerDelegate().onCreate(savedInstanceState, this);
         getPagerDelegate().setPagerAdapter(getSupportFragmentManager(),
-                new ImagePagerAdapter.ImagePagerListener() {
+                new ImagePagerAdapter.ImagePagerListener<Media>() {
                     @Override
-                    public Fragment getFragment(int position, Album album) {
-                        return ImageViewFragment.newInstance(album);
+                    public Fragment getFragment(int position, Media album) {
+                         return ImageViewFragment.newInstance(album);
                     }
                 });
     }
@@ -78,9 +77,9 @@ public class ImageViewActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
     }
 
-    public ImagePagerDelegate getPagerDelegate() {
+    public ImagePagerDelegate<Media> getPagerDelegate() {
         if (pagerDelegate == null) {
-            pagerDelegate = new ImagePagerDelegate();
+            pagerDelegate = new ImagePagerDelegate<>();
         }
         return pagerDelegate;
     }

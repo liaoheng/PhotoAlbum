@@ -40,7 +40,11 @@ dependencies {
     //https://github.com/DreaminginCodeZH/SystemUiHelper
     implementation 'me.zhanghai.android.systemuihelper:library:1.0.0'
 
-    implementation "com.github.liaoheng:common-adapter:0.0.6-SNAPSHOT"
+    implementation group: "com.github.liaoheng", name: "common-adapter", version: "0.0.6-SNAPSHOT", changing: true
 //    compile 'com.github.liaoheng:album:1.0.0'
     api project(':library')
 }
+//configurations.all {
+//  // check for updates every build
+//  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+//}

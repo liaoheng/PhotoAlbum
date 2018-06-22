@@ -1,4 +1,4 @@
-package com.github.liaoheng.album.view;
+package com.github.liaoheng.album.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

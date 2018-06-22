@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.github.liaoheng.album.R;
 import com.github.liaoheng.album.adapter.ImagePagerAdapter;
-import com.github.liaoheng.album.model.Album;
+import com.github.liaoheng.album.model.IMedia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +22,12 @@ import java.util.List;
  * @author liaoheng
  * @version 2015-12-23 17:16
  */
-public class ImagePagerDelegate {
+public class ImagePagerDelegate<T extends IMedia> {
     public static final String PAGER_POSITION = "pagerPosition";
     public static final String ALBUM = "album";
     private ViewPager mViewPager;
     private TextView mIndicator;
-    private List<Album> mAlbums;
+    private List<T> mAlbums;
     private int mPagerPosition;
     private String mStringIndicator;
 
@@ -41,11 +41,7 @@ public class ImagePagerDelegate {
         void indicator(int index);
     }
 
-    public static Bundle getBundle(ArrayList<Album> albums) {
-        return getBundle(albums, 0);
-    }
-
-    public static Bundle getBundle(ArrayList<Album> albums, int pagerPosition) {
+    public static <T extends IMedia> Bundle getBundle(ArrayList<T> albums, int pagerPosition) {
         final Bundle args = new Bundle();
         args.putParcelableArrayList(ImagePagerDelegate.ALBUM, albums);
         args.putInt(ImagePagerDelegate.PAGER_POSITION, pagerPosition);
@@ -92,8 +88,8 @@ public class ImagePagerDelegate {
     }
 
     public void setPagerAdapter(FragmentManager fragmentManager,
-            ImagePagerAdapter.ImagePagerListener listener) {
-        setPagerAdapter(new ImagePagerAdapter(fragmentManager, mAlbums, listener));
+            ImagePagerAdapter.ImagePagerListener<T> listener) {
+        setPagerAdapter(new ImagePagerAdapter<>(fragmentManager, mAlbums, listener));
     }
 
     public void setPagerAdapter(PagerAdapter adapter) {

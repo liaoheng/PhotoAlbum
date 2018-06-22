@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.github.liaoheng.album.model.Album;
+import com.github.liaoheng.album.model.IMedia;
 
 import java.util.List;
 
@@ -12,16 +12,16 @@ import java.util.List;
  * @author liaoheng
  * @version 2015-04-18 01:47
  */
-public class ImagePagerAdapter extends FragmentStatePagerAdapter {
+public class ImagePagerAdapter<T extends IMedia> extends FragmentStatePagerAdapter {
 
-    private List<Album> mAlbums;
-    private ImagePagerListener mListener;
+    private List<T> mAlbums;
+    private ImagePagerListener<T> mListener;
 
-    public interface ImagePagerListener {
-        Fragment getFragment(int position, Album album);
+    public interface ImagePagerListener<M extends IMedia> {
+        Fragment getFragment(int position, M album);
     }
 
-    public ImagePagerAdapter(FragmentManager fm, List<Album> albums, ImagePagerListener listener) {
+    public ImagePagerAdapter(FragmentManager fm, List<T> albums, ImagePagerListener<T> listener) {
         super(fm);
         mAlbums = albums;
         mListener = listener;

@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.github.liaoheng.album.model.Album;
 import com.github.liaoheng.album.sample.utils.GlideApp;
 import com.github.liaoheng.common.adapter.base.BaseRecyclerAdapter;
 import com.github.liaoheng.common.adapter.base.IBaseAdapter;
@@ -65,10 +64,11 @@ public class ImageListActivity extends AppCompatActivity {
                 .addLoadMoreFooterView()
                 .setAdapter(mAdapter)
                 .setOnItemClickListener(
-                        new IBaseAdapter.OnItemClickListener<Album>() {
+                        new IBaseAdapter.OnItemClickListener<Media>() {
                             @Override
-                            public void onItemClick(Album item, View view, int position) {
-                                ImageViewActivity.start(ImageListActivity.this, (ArrayList<Album>) mAdapter.getList(),
+                            public void onItemClick(Media item, View view, int position) {
+                                ImageViewActivity.start(ImageListActivity.this,
+                                        (ArrayList<Media>) mAdapter.getList(),
                                         position);
                             }
                         })
@@ -100,20 +100,20 @@ public class ImageListActivity extends AppCompatActivity {
                             }
                         })
                 .subscribeOn(Schedulers.computation())
-                .map(new Function<String, ArrayList<Album>>() {
+                .map(new Function<String, ArrayList<Media>>() {
                     @Override
-                    public ArrayList<Album> apply(String json) throws JSONException {
-                        ArrayList<Album> albums = new ArrayList<>();
+                    public ArrayList<Media> apply(String json) throws JSONException {
+                        ArrayList<Media> albums = new ArrayList<>();
                         JSONObject jsonObject = new JSONObject(json);
                         JSONArray JsonPhotos = jsonObject.getJSONArray("results");
                         for (int i = 0; i < JsonPhotos.length(); i++) {
                             JSONObject photo = JsonPhotos.getJSONObject(i);
                             String image = photo.getString("url");
-                            albums.add(new Album("" + i, Uri.parse(image)));
+                            albums.add(new Media("" + i, Uri.parse(image)));
                         }
                         return albums;
                     }
-                }).observeOn(AndroidSchedulers.mainThread()).subscribe(new ResourceSubscriber<ArrayList<Album>>() {
+                }).observeOn(AndroidSchedulers.mainThread()).subscribe(new ResourceSubscriber<ArrayList<Media>>() {
             @Override
             public void onStart() {
                 mRecyclerViewHelper.setLoadMoreLoading(true);
@@ -132,7 +132,7 @@ public class ImageListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNext(ArrayList<Album> album) {
+            public void onNext(ArrayList<Media> album) {
                 mRecyclerViewHelper.setLoadMoreHasLoadedAllItems(album.isEmpty());
                 if (mAdapter.isEmpty()) {
                     mAdapter.setList(album);
@@ -144,7 +144,7 @@ public class ImageListActivity extends AppCompatActivity {
         });
     }
 
-    public class ViewHolder extends BaseRecyclerViewHolder<Album> {
+    public class ViewHolder extends BaseRecyclerViewHolder<Media> {
 
         ImageView image;
         TextView text;
@@ -156,13 +156,13 @@ public class ImageListActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onHandle(Album item, int position) {
+        public void onHandle(Media item, int position) {
             text.setText(item.getName());
             GlideApp.with(getContext()).load(item.getUrl()).into(image);
         }
     }
 
-    public class Adapter extends BaseRecyclerAdapter<Album, ViewHolder> {
+    public class Adapter extends BaseRecyclerAdapter<Media, ViewHolder> {
 
         public Adapter(Context context) {
             super(context);
@@ -176,7 +176,7 @@ public class ImageListActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onBindViewHolderItem(ViewHolder holder, Album item, int position) {
+        public void onBindViewHolderItem(ViewHolder holder, Media item, int position) {
             holder.onHandle(item, position);
         }
     }

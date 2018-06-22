@@ -7,9 +7,9 @@ import android.widget.ProgressBar;
 
 import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.github.liaoheng.album.R;
-import com.github.liaoheng.album.model.Album;
+import com.github.liaoheng.album.model.IMedia;
 import com.github.liaoheng.album.model.ImageStateListener;
-import com.github.liaoheng.album.view.PhotoView;
+import com.github.liaoheng.album.widget.PhotoView;
 
 /**
  * 图片查看
@@ -17,15 +17,15 @@ import com.github.liaoheng.album.view.PhotoView;
  * @author liaoheng
  * @version 2015-12-23 17:16
  */
-public class ImageDetailDelegate implements ImageStateListener {
+public class ImageDetailDelegate<T extends IMedia> implements ImageStateListener {
 
-    private Album mAlbum;
+    private T mAlbum;
     private ImageView mPhotoView;
     private ProgressBar mProgressBar;
     private PhotoViewAttacher mPhotoViewAttacher;
-    private ImageListener mImageListener;
+    private ImageListener<T> mImageListener;
 
-    public static Bundle getBundle(Album album) {
+    public static <T extends IMedia> Bundle getBundle(T album) {
         final Bundle args = new Bundle();
         args.putParcelable(ImagePagerDelegate.ALBUM, album);
         return args;
@@ -50,22 +50,22 @@ public class ImageDetailDelegate implements ImageStateListener {
             mPhotoView.setScaleType(ImageView.ScaleType.MATRIX);
         }
 
-        mProgressBar = (ProgressBar) view.findViewById(R.id.photo_album_detail_loading);
+        mProgressBar = view.findViewById(R.id.photo_album_detail_loading);
     }
 
     private boolean isPhotoView() {
         return mPhotoView instanceof com.github.chrisbanes.photoview.PhotoView;
     }
 
-    public interface ImageListener {
-        void load(Album album, ImageView imageView);
+    public interface ImageListener<M extends IMedia> {
+        void load(M album, ImageView imageView);
 
-        void error(Album album, ImageView imageView,Throwable e);
+        void error(M album, ImageView imageView, Throwable e);
 
-        void destroy(Album album, ImageView imageView);
+        void destroy(M album, ImageView imageView);
     }
 
-    public void setImageListener(ImageListener imageListener) {
+    public void setImageListener(ImageListener<T> imageListener) {
         this.mImageListener = imageListener;
     }
 
@@ -79,13 +79,13 @@ public class ImageDetailDelegate implements ImageStateListener {
     @Override
     public void error(Throwable e) {
         if (mImageListener != null) {
-            mImageListener.error(mAlbum, mPhotoView,e);
+            mImageListener.error(mAlbum, mPhotoView, e);
         }
     }
 
     @Override
     public void complete() {
-        if (!isPhotoView() && mPhotoViewAttacher != null) {
+        if (mPhotoViewAttacher != null && !isPhotoView()) {
             mPhotoViewAttacher.update();
         }
     }
@@ -115,7 +115,7 @@ public class ImageDetailDelegate implements ImageStateListener {
         return mPhotoViewAttacher;
     }
 
-    public Album getAlbum() {
+    public IMedia getMedia() {
         return mAlbum;
     }
 }
