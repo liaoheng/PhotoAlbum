@@ -3,5 +3,6 @@
     <item name="photo_album_pager_view" type="id"/>
     <item name="photo_album_pager_indicator" type="id"/>
     <item name="photo_album_detail_image" type="id"/>
+    <item name="photo_album_detail_video" type="id"/>
     <item name="photo_album_detail_loading" type="id"/>
 </resources>
