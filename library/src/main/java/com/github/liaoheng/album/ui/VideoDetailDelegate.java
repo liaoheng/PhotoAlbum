@@ -4,10 +4,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.VideoView;
 
 import com.github.liaoheng.album.R;
 import com.github.liaoheng.album.model.IMedia;
+import com.github.liaoheng.album.widget.VideoView;
 
 /**
  * @author liaoheng
@@ -15,7 +15,7 @@ import com.github.liaoheng.album.model.IMedia;
  */
 public class VideoDetailDelegate<T extends IMedia> {
     private T mAlbum;
-    private VideoView mVideoView;
+    private android.widget.VideoView mVideoView;
     private ImageView mCoverView;
     private ImageDetailDelegate.ImageListener<T> mImageListener;
 
@@ -75,6 +75,10 @@ public class VideoDetailDelegate<T extends IMedia> {
     }
 
     public VideoView getVideoView() {
+        return (VideoView) mVideoView;
+    }
+
+    public android.widget.VideoView baseVideoView() {
         return mVideoView;
     }
 

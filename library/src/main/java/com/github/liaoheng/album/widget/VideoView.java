@@ -97,37 +97,37 @@ public class VideoView extends android.widget.VideoView {
 
     @Override
     public void start() {
-        super.start();
-        state = 1;
         if (mVideoListener != null) {
             mVideoListener.start();
         }
+        super.start();
+        state = 1;
     }
 
     @Override
     public void resume() {
-        state = 0;
-        super.resume();
         if (mVideoListener != null) {
             mVideoListener.resume();
         }
+        super.resume();
+        state = 0;
     }
 
     @Override
     public void pause() {
-        state = 2;
-        super.pause();
         if (mVideoListener != null) {
             mVideoListener.pause();
         }
+        super.pause();
+        state = 2;
     }
 
     @Override
     public void stopPlayback() {
-        state = -1;
-        super.stopPlayback();
         if (mVideoListener != null) {
             mVideoListener.stop();
         }
+        super.stopPlayback();
+        state = -1;
     }
 }
